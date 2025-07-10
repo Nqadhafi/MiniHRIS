@@ -1,5 +1,7 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KasbonController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdmin\RoleController;
@@ -10,7 +12,6 @@ use App\Http\Controllers\SuperAdmin\UserController;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Semua route dikelompokkan berdasarkan middleware
 |
 */
 
@@ -32,5 +33,19 @@ Route::middleware('auth.login')->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
         });
+    });
+
+    // Kasbon Routes
+    Route::prefix('settings')->group(function () {
+        Route::resource('kasbons', KasbonController::class)->names('settings.kasbons')->middleware('kasbon.access');
+
+        // Override edit & update dengan tambahan middleware approve
+        Route::get('kasbons/{kasbon}/edit', [KasbonController::class, 'edit'])
+            ->name('kasbons.edit')
+            ->middleware('kasbon.approve');
+
+        Route::put('kasbons/{kasbon}', [KasbonController::class, 'update'])
+            ->name('kasbons.update')
+            ->middleware('kasbon.approve');
     });
 });

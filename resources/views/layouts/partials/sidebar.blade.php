@@ -33,6 +33,12 @@
         </a>
     </li>
 @endif
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('settings.kasbons.index') }}">
+            <i class="fas fa-fw fa-money-bill-wave"></i>
+            <span>Manajemen Kasbon</span>
+        </a>
+    </li>
     <!-- Tambahkan menu lain sesuai kebutuhan -->
 
     <!-- Sidebar Toggler (Sidebar) -->

@@ -52,4 +52,16 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+        // Relasi ke kasbon sebagai pengaju
+    public function kasoBys()
+    {
+        return $this->hasMany(Kasbon::class, 'user_id');
+    }
+
+    // Relasi ke kasbon yang disetujui oleh user ini
+    public function approvedKasbons()
+    {
+        return $this->hasMany(Kasbon::class, 'approved_by');
+    }
 }

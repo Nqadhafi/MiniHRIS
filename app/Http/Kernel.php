@@ -65,5 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'auth.login' => \App\Http\Middleware\AuthMiddleware::class,
         'super_admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
+        'kasbon.access' => \App\Http\Middleware\EnsureUserCanAccessKasbon::class,
+        'kasbon.approve' => \App\Http\Middleware\EnsureUserCanApproveKasbon::class,
     ];
 }
