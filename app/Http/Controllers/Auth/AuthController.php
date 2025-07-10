@@ -32,13 +32,13 @@ public function showLoginForm()
         }
 
         // Cari user
-        $user = DB::table('users')->where('username', $request->username)->first();
+     $user = DB::table('users')->where('username', $request->username)->first();
 
-        if ($user && Hash::check($request->password, $user->password)) {
-            session(['user' => $user]);
-            RateLimiter::clear($key); // Reset percobaan jika berhasil
-            return 'Login berhasil sebagai ' . $user->username;
-        }
+    if ($user && Hash::check($request->password, $user->password)) {
+        session(['user' => $user]);
+        RateLimiter::clear($key);
+        return redirect()->route('dashboard');
+    }
 
         // Tambahkan hit percobaan gagal
         RateLimiter::hit($key, 60); // Blok selama 60 detik

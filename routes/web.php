@@ -26,9 +26,5 @@ Route::middleware('auth.login')->group(function () {
     Route::get('/', function () {
         return redirect('/dashboard');
     })->name('home');
-
-    Route::get('/dashboard', function () {
-        $user = session('user');
-        return "Selamat datang, {$user->username}!";
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 });
