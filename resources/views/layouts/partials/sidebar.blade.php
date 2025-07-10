@@ -18,7 +18,21 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
+@if(session('user') && session('user')->role_name === 'super_admin')
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('settings.roles.index') }}">
+            <i class="fas fa-fw fa-user-shield"></i>
+            <span>Manajemen Role</span>
+        </a>
+    </li>
 
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('settings.users.index') }}">
+            <i class="fas fa-fw fa-users"></i>
+            <span>Manajemen User</span>
+        </a>
+    </li>
+@endif
     <!-- Tambahkan menu lain sesuai kebutuhan -->
 
     <!-- Sidebar Toggler (Sidebar) -->

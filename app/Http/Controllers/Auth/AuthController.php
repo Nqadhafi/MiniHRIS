@@ -19,20 +19,20 @@ public function showLoginForm()
 
     public function login(Request $request)
     {
-        // Key unik berdasarkan IP dan username
-        $key = 'login.' . $request->ip() . '.' . Str::lower($request->username);
+     // Key rate limiter
+    $key = 'login.' . $request->ip() . '.' . Str::lower($request->username);
 
-        // Cek apakah sudah terkena rate limit
-        if (RateLimiter::tooManyAttempts($key, $perMinute = 5)) {
-            $seconds = RateLimiter::availableIn($key);
+    if (RateLimiter::tooManyAttempts($key, 5)) {
+        return back()->withErrors([
+            'login' => 'Terlalu banyak percobaan. Silakan coba lagi nanti.'
+        ]);
+    }
 
-            return back()->withErrors([
-                'login' => "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik.",
-            ]);
-        }
-
-        // Cari user
-     $user = DB::table('users')->where('username', $request->username)->first();
+    $user = DB::table('users')
+        ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
+        ->select('users.*', 'roles.name as role_name')
+        ->where('users.username', $request->username)
+        ->first();
 
     if ($user && Hash::check($request->password, $user->password)) {
         session(['user' => $user]);
@@ -40,12 +40,8 @@ public function showLoginForm()
         return redirect()->route('dashboard');
     }
 
-        // Tambahkan hit percobaan gagal
-        RateLimiter::hit($key, 60); // Blok selama 60 detik
-
-        return back()->withErrors([
-            'login' => 'Username atau password salah.',
-        ]);
+    RateLimiter::hit($key, 60);
+    return back()->withErrors(['login' => 'Username atau password salah.']);
     }
 
     public function logout()
