@@ -57,7 +57,7 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.22.2/dist/sweetalert2.min.css
     "></script>
     <!-- Custom scripts for all pages -->
     <script src="{{ asset('sb-admin2/js/sb-admin-2.min.js') }}"></script>
-
+@stack('scripts')
 </body>
 
 </html>
