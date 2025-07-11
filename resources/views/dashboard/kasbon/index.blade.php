@@ -8,10 +8,46 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Pengajuan Kasbon</h1>
-
-            <a href="{{ route('settings.kasbons.create') }}" class="btn btn-primary">Ajukan Kasbon</a>
-
+        <a href="{{ route('settings.kasbons.create') }}" class="btn btn-primary">Ajukan Kasbon</a>
     </div>
+
+    <!-- Form Search dan Filter -->
+    <form method="GET" action="{{ route('settings.kasbons.index') }}">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Cari Kasbon" value="{{ request()->search }}">
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-control">
+                    <option value="">Semua Status</option>
+                    @foreach ($statusOptions as $status)
+                        <option value="{{ $status }}" {{ request()->status == $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="start_date" class="form-control" value="{{ request()->start_date ?: now()->startOfMonth()->format('Y-m-d') }}">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="end_date" class="form-control" value="{{ request()->end_date ?: now()->endOfMonth()->format('Y-m-d') }}">
+            </div>
+            <div class="col-md-2">
+                <select name="sort_by" class="form-control">
+                    <option value="tanggal_pengajuan" {{ request()->sort_by == 'tanggal_pengajuan' ? 'selected' : '' }}>Tanggal</option>
+                    <option value="jumlah" {{ request()->sort_by == 'jumlah' ? 'selected' : '' }}>Jumlah</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <select name="sort_order" class="form-control">
+                    <option value="asc" {{ request()->sort_order == 'asc' ? 'selected' : '' }}>Asc</option>
+                    <option value="desc" {{ request()->sort_order == 'desc' ? 'selected' : '' }}>Desc</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary">Filter</button>
+            </div>
+        </div>
+    </form>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -34,7 +70,6 @@
                     </thead>
                     <tbody>
                         @forelse($kasbons as $kasbon)
-                        
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ \Carbon\Carbon::parse($kasbon->tanggal_pengajuan)->format('d-m-Y') }}</td>

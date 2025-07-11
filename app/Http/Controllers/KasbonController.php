@@ -10,7 +10,7 @@ class KasbonController extends Controller
 {
    // Middleware akan mengatur akses di RouteServiceProvider
 
-public function index()
+public function index(Request $request)
 {
     $user = session('user');
 
@@ -21,7 +21,7 @@ public function index()
         $query->where('user_id', $user->id);
     } elseif ($user->role_name === 'hr') {
         $query->whereHas('user', function ($q) {
-            $q->whereIn('role_id', [2, 3]);
+            $q->whereIn('role_id', [2, 3, 4]);
         });
     } elseif ($user->role_name === 'direktur') {
         $query->whereHas('user', function ($q) {
@@ -33,13 +33,50 @@ public function index()
         });
     }
 
+    // Filter berdasarkan status kasbon jika ada
+    if ($request->has('status') && $request->status != '') {
+        $query->where('status', $request->status);
+    }
+
+    // Filter berdasarkan range tanggal pengajuan
+    if ($request->has('start_date') && $request->has('end_date')) {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+        $query->whereBetween('tanggal_pengajuan', [$startDate, $endDate]);
+    } else {
+        // Jika tidak ada filter, defaultkan ke bulan ini
+        $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+        $endOfMonth = now()->endOfMonth()->format('Y-m-d');
+        $query->whereBetween('tanggal_pengajuan', [$startOfMonth, $endOfMonth]);
+    }
+
+    // Fitur pencarian
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('keperluan', 'like', "%$search%")
+              ->orWhere('jumlah', 'like', "%$search%")
+              ->orWhereDate('tanggal_pengajuan', 'like', "%$search%");
+        });
+    }
+
+    // Sorting berdasarkan parameter jika ada
+    if ($request->has('sort_by') && $request->has('sort_order')) {
+        $query->orderBy($request->sort_by, $request->sort_order);
+    }
+
     $kasbons = $query->get();
 
-    // Kirimkan role user ke view
+    // Kirimkan role user dan data filter ke view
     $canApproveKasbon = in_array($user->role_name, ['hr', 'direktur', 'holding']);
+    
+    // Mengirim data untuk filter (opsi status)
+    $statusOptions = ['menunggu', 'disetujui', 'ditolak'];
 
-    return view('dashboard.kasbon.index', compact('kasbons', 'canApproveKasbon'));
+    return view('dashboard.kasbon.index', compact('kasbons', 'canApproveKasbon', 'statusOptions'));
 }
+
+
 
 
     public function create()
