@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kasbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,27 +14,31 @@ public function index()
 {
     $user = session('user');
 
-    $query = \App\Models\Kasbon::with('user'); // Pakai Eloquent dan eager load relasi
+    // Ambil data kasbon dengan relasi user
+    $query = Kasbon::with('user');
 
     if ($user->role_name === 'staff' || $user->role_name === 'spv') {
         $query->where('user_id', $user->id);
     } elseif ($user->role_name === 'hr') {
         $query->whereHas('user', function ($q) {
-            $q->whereIn('role_name', ['staff', 'spv']);
+            $q->whereIn('role_id', [2, 3]);
         });
     } elseif ($user->role_name === 'direktur') {
         $query->whereHas('user', function ($q) {
-            $q->where('role_name', 'hr');
+            $q->where('role_id', 4);
         });
     } elseif ($user->role_name === 'holding') {
         $query->whereHas('user', function ($q) {
-            $q->where('role_name', 'direktur');
+            $q->where('role_id', 5);
         });
     }
 
     $kasbons = $query->get();
 
-    return view('dashboard.kasbon.index', compact('kasbons'));
+    // Kirimkan role user ke view
+    $canApproveKasbon = in_array($user->role_name, ['hr', 'direktur', 'holding']);
+
+    return view('dashboard.kasbon.index', compact('kasbons', 'canApproveKasbon'));
 }
 
 
@@ -76,47 +81,83 @@ public function index()
         return view('dashboard.kasbon.show', compact('kasbon'));
     }
 
-    public function edit($id)
-    {
-        $kasbon = DB::table('kasbons')->where('id', $id)->first();
+public function edit($id)
+{
+    // Ambil data kasbon + user info
+    $kasbon = DB::table('kasbons')
+        ->join('users', 'kasbons.user_id', '=', 'users.id')
+        ->select('kasbons.*', 'users.role_id', 'users.username')
+        ->where('kasbons.id', $id)
+        ->first();
 
-        if (!$kasbon) abort(404);
-
-        // Cek apakah user berhak approve
-        $currentUser = session('user');
-
-        $canApprove = false;
-
-        if (in_array($currentUser->role_name, ['hr']) && in_array($kasbon->user->role_name, ['staff', 'spv'])) {
-            $canApprove = true;
-        } elseif ($currentUser->role_name === 'direktur' && $kasbon->user->role_name === 'hr') {
-            $canApprove = true;
-        } elseif ($currentUser->role_name === 'holding' && $kasbon->user->role_name === 'direktur') {
-            $canApprove = true;
-        }
-
-        if (!$canApprove) {
-            abort(403, 'Anda tidak memiliki izin untuk menyetujui pengajuan ini.');
-        }
-
-        return view('dashboard.kasbon.edit', compact('kasbon'));
+    if (!$kasbon) {
+        abort(404);
     }
+
+    // Ambil semua role dari database
+    $roles = DB::table('roles')->pluck('name', 'id');
+
+    $currentUser = session('user');
+
+    if (!$currentUser) {
+        abort(403, 'Anda harus login untuk mengakses halaman ini.');
+    }
+
+    // Dapatkan nama role
+    $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
+    $currentUserRoleName = $roles[$currentUser->role_id] ?? null;
+
+    // Cek apakah user berhak approve
+    $canApprove = false;
+
+    if (in_array($kasbonUserRoleName, ['staff', 'spv']) && $currentUserRoleName === 'hr') {
+        $canApprove = true;
+    } elseif ($kasbonUserRoleName === 'hr' && $currentUserRoleName === 'direktur') {
+        $canApprove = true;
+    } elseif ($kasbonUserRoleName === 'direktur' && $currentUserRoleName === 'holding') {
+        $canApprove = true;
+    }
+
+    if (!$canApprove) {
+        abort(403, 'Anda tidak memiliki izin untuk menyetujui pengajuan ini.');
+    }
+
+    return view('dashboard.kasbon.edit', compact('kasbon'));
+}
 
     public function update(Request $request, $id)
     {
-        $kasbon = DB::table('kasbons')->where('id', $id)->first();
+        // Ambil data kasbon + role user
+        $kasbon = DB::table('kasbons')
+            ->join('users', 'kasbons.user_id', '=', 'users.id')
+            ->select('kasbons.*', 'users.role_id')
+            ->where('kasbons.id', $id)
+            ->first();
 
-        if (!$kasbon) abort(404);
+        if (!$kasbon) {
+            abort(404, 'Pengajuan kasbon tidak ditemukan.');
+        }
+
+        // Ambil semua role
+        $roles = DB::table('roles')->pluck('name', 'id');
 
         $currentUser = session('user');
 
+        if (!$currentUser) {
+            abort(403, 'Anda harus login untuk melakukan aksi ini.');
+        }
+
+        $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
+        $currentUserRoleName = $roles[$currentUser->role_id] ?? null;
+
+        // Cek apakah user berhak approve
         $canApprove = false;
 
-        if (in_array($currentUser->role_name, ['hr']) && in_array($kasbon->user->role_name, ['staff', 'spv'])) {
+        if (in_array($kasbonUserRoleName, ['staff', 'spv']) && $currentUserRoleName === 'hr') {
             $canApprove = true;
-        } elseif ($currentUser->role_name === 'direktur' && $kasbon->user->role_name === 'hr') {
+        } elseif ($kasbonUserRoleName === 'hr' && $currentUserRoleName === 'direktur') {
             $canApprove = true;
-        } elseif ($currentUser->role_name === 'holding' && $kasbon->user->role_name === 'direktur') {
+        } elseif ($kasbonUserRoleName === 'direktur' && $currentUserRoleName === 'holding') {
             $canApprove = true;
         }
 
@@ -124,7 +165,7 @@ public function index()
             abort(403, 'Anda tidak bisa menyetujui pengajuan ini.');
         }
 
-        // Update status
+        // Update status kasbon
         DB::table('kasbons')
             ->where('id', $id)
             ->update([

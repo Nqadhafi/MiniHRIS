@@ -28,7 +28,7 @@
 
                 <div class="form-group">
                     <label>Pengaju</label>
-                    <input type="text" class="form-control" value="{{ $kasbon->user->username }}" readonly>
+                    <input type="text" class="form-control" value="{{ $kasbon->username }}" readonly>
                 </div>
 
                 <div class="form-group">

@@ -17,16 +17,20 @@ class EnsureUserCanApproveKasbon
      */
     public function handle(Request $request, Closure $next)
     {
-                // Ambil user yang sedang login
+        // Ambil user dari session
         $user = session('user');
 
-        // Ambil ID kasbon dari URL
+        if (!$user) {
+            abort(403, 'Anda harus login untuk melakukan aksi ini.');
+        }
+
+        // Ambil ID kasbon dari route
         $kasbonId = $request->route('kasbon');
 
-        // Ambil data kasbon dari database
+        // Ambil data kasbon + role_id user pengaju
         $kasbon = DB::table('kasbons')
-            ->leftJoin('users', 'kasbons.user_id', '=', 'users.id')
-            ->select('kasbons.*', 'users.role_name')
+            ->join('users', 'kasbons.user_id', '=', 'users.id')
+            ->select('kasbons.*', 'users.role_id')
             ->where('kasbons.id', $kasbonId)
             ->first();
 
@@ -34,20 +38,30 @@ class EnsureUserCanApproveKasbon
             abort(404, 'Pengajuan kasbon tidak ditemukan');
         }
 
+        // Ambil semua role dari tabel roles secara dinamis
+        $roles = DB::table('roles')->pluck('name', 'id');
+
+        // Dapatkan nama role dari user yang mengajukan kasbon
+        $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
+
+        // Dapatkan nama role dari user yang login
+        $currentUserRoleName = $roles[$user->role_id] ?? null;
+
         // Cek apakah user berhak approve
         $canApprove = false;
 
-        if ($kasbon->role_name === 'staff' || $kasbon->role_name === 'spv') {
-            $canApprove = $user->role_name === 'hr';
-        } elseif ($kasbon->role_name === 'hr') {
-            $canApprove = $user->role_name === 'direktur';
-        } elseif ($kasbon->role_name === 'direktur') {
-            $canApprove = $user->role_name === 'holding';
+        if (in_array($kasbonUserRoleName, ['staff', 'spv'])) {
+            $canApprove = ($currentUserRoleName === 'hr');
+        } elseif ($kasbonUserRoleName === 'hr') {
+            $canApprove = ($currentUserRoleName === 'direktur');
+        } elseif ($kasbonUserRoleName === 'direktur') {
+            $canApprove = ($currentUserRoleName === 'holding');
         }
 
         if (!$canApprove) {
             abort(403, 'Anda tidak memiliki izin untuk menyetujui pengajuan ini.');
         }
+
         return $next($request);
     }
 }
