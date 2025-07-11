@@ -45,6 +45,7 @@
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-secondary">Filter</button>
+                <a href="{{ route('settings.kasbons.index') }}" class="btn btn-secondary">Reset</a>
             </div>
         </div>
     </form>

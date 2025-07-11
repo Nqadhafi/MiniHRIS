@@ -65,7 +65,7 @@ public function index(Request $request)
         $query->orderBy($request->sort_by, $request->sort_order);
     }
 
-    $kasbons = $query->get();
+    $kasbons = $query->get()->sortByDesc('tanggal_pengajuan');
 
     // Kirimkan role user dan data filter ke view
     $canApproveKasbon = in_array($user->role_name, ['hr', 'direktur', 'holding']);
