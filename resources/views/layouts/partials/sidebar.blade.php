@@ -19,26 +19,34 @@
             <span>Dashboard</span></a>
     </li>
     <li class="nav-item">
-    <a class="nav-link" href="{{ route('settings.profile.edit') }}">
-        <i class="fas fa-fw fa-user"></i>
-        <span>Profil Saya</span>
-    </a>
-</li>
-@if(session('user') && session('user')->role_name === 'super_admin')
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('settings.roles.index') }}">
-            <i class="fas fa-fw fa-user-shield"></i>
-            <span>Manajemen Role</span>
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#profileCollapse"
+            aria-expanded="true" aria-controls="profileCollapse">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Profil Saya</span>
         </a>
+        <div id="profileCollapse" class="collapse" aria-labelledby="profileCollapse" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Setting Profil :</h6>
+                <a class="collapse-item" href="{{ route('settings.profile.edit') }}">Profil Saya</a>
+                <a class="collapse-item" href="{{ route('settings.profile.change-password') }}">Ganti Passowrd</a>
+            </div>
+        </div>
     </li>
+    @if (session('user') && session('user')->role_name === 'super_admin')
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('settings.roles.index') }}">
+                <i class="fas fa-fw fa-user-shield"></i>
+                <span>Manajemen Role</span>
+            </a>
+        </li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('settings.users.index') }}">
-            <i class="fas fa-fw fa-users"></i>
-            <span>Manajemen User</span>
-        </a>
-    </li>
-@endif
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('settings.users.index') }}">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Manajemen User</span>
+            </a>
+        </li>
+    @endif
     <li class="nav-item">
         <a class="nav-link" href="{{ route('settings.kasbons.index') }}">
             <i class="fas fa-fw fa-money-bill-wave"></i>

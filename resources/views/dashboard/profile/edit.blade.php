@@ -29,7 +29,10 @@
                             <label for="name">Nama Lengkap</label>
                             <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $profile->name ?? '') }}" required>
                         </div>
-
+                        <div class="form-group">
+                            <label for="">Jabatan</label>
+                            <input type="text" name="position" id="position" class="form-control" disabled value="{{ old('position', $user->role_name ?? '') }}" required>
+                        </div>
                         <div class="form-group">
                             <label for="phone">Nomor Telepon</label>
                             <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone', $profile->phone ?? '') }}">

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
@@ -61,4 +64,35 @@ class ProfileController extends Controller
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
     }
+
+    public function showChangePasswordForm()
+{
+    return view('dashboard.profile.change_password');
+}
+
+public function changePassword(Request $request)
+{
+    $user = session('user');
+
+    // Validasi input
+    $request->validate([
+        'current_password' => 'required',
+        'new_password' => ['required', 'confirmed', Password::defaults()],
+    ]);
+
+    // Cek apakah password lama cocok
+    if (!Hash::check($request->input('current_password'), $user->password)) {
+        return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
+    }
+
+    // Update password di database
+    DB::table('users')
+        ->where('id', $user->id)
+        ->update([
+            'password' => Hash::make($request->input('new_password')),
+            'updated_at' => now()
+        ]);
+
+    return redirect()->back()->with('success', 'Password berhasil diperbarui.');
+}
     }

@@ -29,6 +29,9 @@ Route::middleware('auth.login')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('settings.profile.update');
+    //change password
+    Route::get('/change-password', [ProfileController::class, 'showChangePasswordForm'])->name('settings.profile.change-password');
+    Route::post('/change-password', [ProfileController::class, 'changePassword']);
 
     // Super Admin Routes
     Route::middleware('super_admin')->group(function () {
