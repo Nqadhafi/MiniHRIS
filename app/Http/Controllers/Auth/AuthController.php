@@ -2,51 +2,61 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 class AuthController extends Controller
 {
-public function showLoginForm()
+    public function showLoginForm()
     {
         return view('auth.login');
     }
 
     public function login(Request $request)
     {
-     // Key rate limiter
-    $key = 'login.' . $request->ip() . '.' . Str::lower($request->username);
-
-    if (RateLimiter::tooManyAttempts($key, 5)) {
-        return back()->withErrors([
-            'login' => 'Terlalu banyak percobaan. Silakan coba lagi nanti.'
+        // Validasi input
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
         ]);
-    }
 
-    $user = DB::table('users')
-        ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
-        ->select('users.*', 'roles.name as role_name')
-        ->where('users.username', $request->username)
-        ->first();
+        // Rate limiter key
+        $key = 'login:' . $request->ip() . ':' . Str::lower($request->username);
 
-    if ($user && Hash::check($request->password, $user->password)) {
-        session(['user' => $user]);
-        RateLimiter::clear($key);
-        return redirect()->route('dashboard');
-    }
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return back()->withErrors([
+                'login' => "Terlalu banyak percobaan. Silakan coba lagi dalam $seconds detik."
+            ]);
+        }
 
-    RateLimiter::hit($key, 60);
-    return back()->withErrors(['login' => 'Username atau password salah.']);
+        // Attempt login using Laravel Auth
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+            RateLimiter::clear($key);
+
+            // Optional: ambil dan simpan nama role jika dibutuhkan di session
+            $user = User::with('role')->where('id', Auth::id())->first();
+
+            $user->load('role'); // pastikan relasi role ada di model User
+
+            session(['role_name' => $user->role->name ?? '']);
+
+            return redirect()->route('dashboard');
+        }
+
+        RateLimiter::hit($key, 60);
+        return back()->withErrors(['login' => 'Username atau password salah.']);
     }
 
     public function logout()
     {
-        session()->forget('user');
+        Auth::logout();
+        session()->forget('role_name');
         return redirect('/login');
     }
 }

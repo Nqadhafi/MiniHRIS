@@ -7,7 +7,7 @@
     <div class="row">
         <!-- Chart Kasbon -->
 
-        @if(session('user')->role_name === 'hr')
+        @if(auth()->user()->role->name === 'hr')
         <div class="col-xl-6 col-md-12 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
