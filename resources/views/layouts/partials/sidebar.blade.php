@@ -18,6 +18,12 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
+    <li class="nav-item">
+    <a class="nav-link" href="{{ route('settings.profile.edit') }}">
+        <i class="fas fa-fw fa-user"></i>
+        <span>Profil Saya</span>
+    </a>
+</li>
 @if(session('user') && session('user')->role_name === 'super_admin')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('settings.roles.index') }}">

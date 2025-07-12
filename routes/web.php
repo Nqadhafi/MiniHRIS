@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\KasbonController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdmin\RoleController;
@@ -26,6 +27,8 @@ Route::middleware('auth.login')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', fn() => redirect('/dashboard'))->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('settings.profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('settings.profile.update');
 
     // Super Admin Routes
     Route::middleware('super_admin')->group(function () {
