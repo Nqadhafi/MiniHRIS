@@ -18,7 +18,7 @@ class EnsureUserCanApproveKasbon
     public function handle(Request $request, Closure $next)
     {
         // Ambil user dari session
-        $user = session('user');
+        $user = auth()->user();
 
         if (!$user) {
             abort(403, 'Anda harus login untuk melakukan aksi ini.');
@@ -45,7 +45,7 @@ class EnsureUserCanApproveKasbon
         $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
 
         // Dapatkan nama role dari user yang login
-        $currentUserRoleName = $roles[$user->role_id] ?? null;
+        $currentUserRoleName = $roles[$user->role->id] ?? null;
 
         // Cek apakah user berhak approve
         $canApprove = false;

@@ -31,7 +31,7 @@
                         </div>
                         <div class="form-group">
                             <label for="">Jabatan</label>
-                            <input type="text" name="position" id="position" class="form-control" disabled value="{{ old('position', $user->role_name ?? '') }}" required>
+                            <input type="text" name="position" id="position" class="form-control" disabled value="{{ old('position', $user->role->name ?? '') }}" required>
                         </div>
                         <div class="form-group">
                             <label for="phone">Nomor Telepon</label>

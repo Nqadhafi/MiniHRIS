@@ -14,7 +14,7 @@ class ProfileController extends Controller
     // Menampilkan form edit profil
     public function edit()
     {
-        $user = session('user');
+        $user = auth()->user();
         $profile = UserProfile::where('user_id', $user->id)->first();
 
         return view('dashboard.profile.edit', compact('user', 'profile'));
@@ -23,7 +23,12 @@ class ProfileController extends Controller
     // Memperbarui profil
     public function update(Request $request)
     {
-        $user = session('user');
+        $user = auth()->user();
+
+         // Cek apakah user sudah login
+         if (!$user) {
+             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+         }
    // Validasi input
          $request->validate([
             'name' => 'required|string|max:255',
@@ -72,7 +77,7 @@ class ProfileController extends Controller
 
 public function changePassword(Request $request)
 {
-    $user = session('user');
+    $user = auth()->user();
 
     // Validasi input
     $request->validate([

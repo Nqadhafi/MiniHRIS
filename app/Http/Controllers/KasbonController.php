@@ -12,22 +12,22 @@ class KasbonController extends Controller
 
 public function index(Request $request)
 {
-    $user = session('user');
+    $user = auth()->user();
 
     // Ambil data kasbon dengan relasi user
     $query = Kasbon::with('user');
 
-    if ($user->role_name === 'staff' || $user->role_name === 'spv') {
+    if ($user->role->name === 'staff' || $user->role->name === 'spv') {
         $query->where('user_id', $user->id);
-    } elseif ($user->role_name === 'hr') {
+    } elseif ($user->role->name === 'hr') {
         $query->whereHas('user', function ($q) {
             $q->whereIn('role_id', [2, 3, 4]);
         });
-    } elseif ($user->role_name === 'direktur') {
+    } elseif ($user->role->name === 'direktur') {
         $query->whereHas('user', function ($q) {
             $q->where('role_id', 4);
         });
-    } elseif ($user->role_name === 'holding') {
+    } elseif ($user->role->name === 'holding') {
         $query->whereHas('user', function ($q) {
             $q->where('role_id', 5);
         });
@@ -92,7 +92,7 @@ public function index(Request $request)
             'keperluan' => 'required|string|max:500'
         ]);
 
-        $user = session('user');
+        $user = auth()->user();
 
         DB::table('kasbons')->insert([
             'user_id' => $user->id,
@@ -134,7 +134,7 @@ public function edit($id)
     // Ambil semua role dari database
     $roles = DB::table('roles')->pluck('name', 'id');
 
-    $currentUser = session('user');
+    $currentUser = auth()->user();
 
     if (!$currentUser) {
         abort(403, 'Anda harus login untuk mengakses halaman ini.');
@@ -142,7 +142,7 @@ public function edit($id)
 
     // Dapatkan nama role
     $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
-    $currentUserRoleName = $roles[$currentUser->role_id] ?? null;
+    $currentUserRoleName = $roles[$currentUser->role->id] ?? null;
 
     // Cek apakah user berhak approve
     $canApprove = false;
@@ -178,14 +178,14 @@ public function edit($id)
         // Ambil semua role
         $roles = DB::table('roles')->pluck('name', 'id');
 
-        $currentUser = session('user');
+        $currentUser = auth()->user();
 
         if (!$currentUser) {
             abort(403, 'Anda harus login untuk melakukan aksi ini.');
         }
 
         $kasbonUserRoleName = $roles[$kasbon->role_id] ?? null;
-        $currentUserRoleName = $roles[$currentUser->role_id] ?? null;
+        $currentUserRoleName = $roles[$currentUser->role->id] ?? null;
 
         // Cek apakah user berhak approve
         $canApprove = false;

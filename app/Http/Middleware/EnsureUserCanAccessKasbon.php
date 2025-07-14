@@ -17,13 +17,13 @@ class EnsureUserCanAccessKasbon
     public function handle(Request $request, Closure $next)
     {
         // Ambil data user dari session
-        $user = session('user');
+        $user = auth()->user();
 
         // Daftar role yang diizinkan akses ke kasbon
         $allowedRoles = ['staff', 'spv', 'hr', 'direktur', 'holding'];
 
         // Cek apakah user login dan memiliki role yang diizinkan
-        if (!$user || !in_array($user->role_name, $allowedRoles)) {
+        if (!$user || !in_array($user->role->name, $allowedRoles)) {
             abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
         }
         return $next($request);

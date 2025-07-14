@@ -81,28 +81,28 @@
                                 @if ($kasbon->approved_by)
                                     <br>
                                     <small class="text-muted">
-                                        Oleh: {{ optional($kasbon->approver)->username ?? '-' }}
+                                        Oleh: {{ optional($kasbon->approver)->userProfile->name ?? '-' }}
                                     </small>
                                 @endif
                             </td>
                             <td>
                                 @php
-                                    $currentUser = session('user');
+                                    $currentUser = auth()->user();
                                     $canApprove = false;
 
                                     if (
                                         in_array($kasbon->user->role->name, ['staff', 'spv']) &&
-                                        $currentUser->role_name === 'hr'
+                                        $currentUser->role->name === 'hr'
                                     ) {
                                         $canApprove = true;
                                     } elseif (
                                         $kasbon->user->role->name === 'hr' &&
-                                        $currentUser->role_name === 'direktur'
+                                        $currentUser->role->name === 'direktur'
                                     ) {
                                         $canApprove = true;
                                     } elseif (
                                         $kasbon->user->role->name === 'direktur' &&
-                                        $currentUser->role_name === 'holding'
+                                        $currentUser->role->name === 'holding'
                                     ) {
                                         $canApprove = true;
                                     }

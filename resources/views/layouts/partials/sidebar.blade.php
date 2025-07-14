@@ -32,7 +32,7 @@
             </div>
         </div>
     </li>
-    @if (session('user') && session('user')->role_name === 'super_admin')
+    @if (auth()->user()->role->name === 'super_admin')
         <li class="nav-item">
             <a class="nav-link" href="{{ route('settings.roles.index') }}">
                 <i class="fas fa-fw fa-user-shield"></i>
