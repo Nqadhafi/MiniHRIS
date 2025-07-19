@@ -26,6 +26,10 @@
                 @csrf
                 @method('PUT')
                 <div class="form-group">
+                <label for="name">Nama Lengkap</label>
+                <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                </div>
+                <div class="form-group">
                     <label>Username</label>
                     <input type="text" name="username" class="form-control" required value="{{ old('username', $user->username) }}">
                 </div>

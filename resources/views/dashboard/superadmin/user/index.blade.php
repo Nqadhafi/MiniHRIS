@@ -20,7 +20,8 @@
                 <table class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>No</th>
+                            <th>Nama Lengkap</th>
                             <th>Username</th>
                             <th>Role</th>
                             <th>Aksi</th>
@@ -29,7 +30,8 @@
                     <tbody>
                         @foreach ($users as $user)
                         <tr>
-                            <td>{{ $user->id }}</td>
+                            <td>{{ $loop->itteration }}</td>
+                            <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->role_name ?? '-' }}</td>
                             <td>

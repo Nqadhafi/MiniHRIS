@@ -14,7 +14,8 @@ class UserController extends Controller
     {
         $users = DB::table('users')
             ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
-            ->select('users.*', 'roles.name as role_name')
+            ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
+            ->select('users.*', 'roles.name as role_name', 'user_profiles.name')
             ->get();
 
         return view('dashboard.superadmin.user.index', compact('users'));
@@ -29,15 +30,22 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'name' => 'required|string|max:255',
             'username' => 'required|unique:users',
             'password' => 'required|min:6',
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        DB::table('users')->insert([
+        $userId = DB::table('users')->insertGetId([
             'username' => strtolower(str_replace(' ', '', $request->username)),
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('user_profiles')->insert([
+            'user_id' => $userId,
+            'name' => $request->name,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -49,7 +57,8 @@ class UserController extends Controller
     {
         $user = DB::table('users')
             ->leftJoin('roles', 'users.role_id', '=', 'roles.id')
-            ->select('users.*', 'roles.name as role_name')
+            ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
+            ->select('users.*', 'roles.name as role_name', 'user_profiles.name')
             ->where('users.id', $id)
             ->first();
 
@@ -60,7 +69,11 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
+        $user = DB::table('users')
+            ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
+            ->select('users.*', 'user_profiles.name')
+            ->where('users.id', $id)
+            ->first();
         $roles = DB::table('roles')->get();
 
         if (!$user) abort(404);
@@ -71,6 +84,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
+            'name' => 'required|string|max:255',
             'username' => 'required|unique:users,username,' . $id,
             'password' => 'nullable|min:6',
             'role_id' => 'required|exists:roles,id',
@@ -87,6 +101,12 @@ class UserController extends Controller
         }
 
         DB::table('users')->where('id', $id)->update($data);
+        DB::table('user_profiles')
+            ->where('user_id', $id)
+            ->update([
+                'name' => $request->name,
+                'updated_at' => now(),
+            ]);
 
         return redirect()->route('settings.users.index')->with('success', 'User berhasil diperbarui');
     }
