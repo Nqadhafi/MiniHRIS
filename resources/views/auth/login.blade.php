@@ -27,7 +27,7 @@
                                 <div class="form-group">
                                     <input type="text" class="form-control form-control-user"
                                         name="username" value="{{ old('username') }}" required autofocus
-                                        placeholder="Enter Username">
+                                        placeholder="Masukan Nomor Induk Karyawan">
                                 </div>
                                 <div class="form-group">
                                     <input type="password" class="form-control form-control-user" name="password" placeholder="Password">

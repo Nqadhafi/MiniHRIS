@@ -35,7 +35,7 @@ class UserController extends Controller
         ]);
 
         DB::table('users')->insert([
-            'username' => $request->username,
+            'username' => strtolower(str_replace(' ', '', $request->username)),
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
             'created_at' => now(),
@@ -77,7 +77,7 @@ class UserController extends Controller
         ]);
 
         $data = [
-            'username' => $request->username,
+            'username' => strtolower(str_replace(' ', '', $request->username)),
             'role_id' => $request->role_id,
             'updated_at' => now(),
         ];
