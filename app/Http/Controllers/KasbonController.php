@@ -19,11 +19,7 @@ public function index(Request $request)
 
     if ($user->role->name === 'staff' || $user->role->name === 'spv') {
         $query->where('user_id', $user->id);
-    } elseif ($user->role->name === 'hr') {
-        $query->whereHas('user', function ($q) {
-            $q->whereIn('role_id', [2, 3, 4]);
-        });
-    } elseif ($user->role->name === 'direktur') {
+    }elseif ($user->role->name === 'direktur') {
         $query->whereHas('user', function ($q) {
             $q->where('role_id', 4);
         });
