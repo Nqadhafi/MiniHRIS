@@ -202,6 +202,8 @@ public function edit($id)
         DB::table('kasbons')
             ->where('id', $id)
             ->update([
+                'reason' => $request->input('reason', null),
+                'jumlah' => $request->input('jumlah', $kasbon->jumlah),
                 'status' => $request->input('status'),
                 'approved_by' => $currentUser->id,
                 'approved_at' => now(),

@@ -67,6 +67,7 @@
                             <th>Jumlah</th>
                             <th>Keperluan</th>
                             <th>Status</th>
+                            <th>Alasan</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -86,6 +87,9 @@
                                         Oleh: {{ optional($kasbon->approver)->userProfile->name ?? '-' }}
                                     </small>
                                 @endif
+                            </td>
+                            <td>
+                                {{ $kasbon->reason ?? '-' }}
                             </td>
                             <td>
                                 @php

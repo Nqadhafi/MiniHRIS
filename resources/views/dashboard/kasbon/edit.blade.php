@@ -37,8 +37,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Jumlah</label>
-                    <input type="number" name="jumlah" class="form-control" value="{{ $kasbon->jumlah }}" readonly>
+                    <label>Jumlah disetujui</label>
+                    <input type="number" name="jumlah" class="form-control" value="{{ $kasbon->jumlah }}">
                 </div>
 
                 <div class="form-group">
@@ -52,6 +52,10 @@
                         <option value="disetujui" {{ $kasbon->status === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                         <option value="ditolak" {{ $kasbon->status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Alasan Penolakan (jika ada)</label>
+                    <textarea name="reason" class="form-control" rows="3">{{ old('reason', $kasbon->reason) }}</textarea>
                 </div>
 
                 <button type="submit" class="btn btn-success">Update Status</button>
