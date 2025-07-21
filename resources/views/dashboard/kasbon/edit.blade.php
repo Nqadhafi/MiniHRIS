@@ -37,8 +37,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Jumlah disetujui</label>
-                    <input type="number" name="jumlah" class="form-control" value="{{ $kasbon->jumlah }}">
+                    <label>Jumlah Disetujui</label>
+                    <input type="text" id="jumlah" class="form-control" placeholder="Rp" value="{{ 'Rp ' . number_format($kasbon->jumlah, 0, ',', '.') }}" oninput="formatRupiah(this)">
+                    <input type="hidden" name="jumlah" id="jumlah_asli" value="{{ $kasbon->jumlah }}">
                 </div>
 
                 <div class="form-group">
@@ -53,6 +54,7 @@
                         <option value="ditolak" {{ $kasbon->status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label>Alasan Penolakan (jika ada)</label>
                     <textarea name="reason" class="form-control" rows="3">{{ old('reason', $kasbon->reason) }}</textarea>
@@ -65,3 +67,20 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function formatRupiah(input) {
+        let value = input.value.replace(/[^\d]/g, '');
+        if (!value) {
+            document.getElementById('jumlah_asli').value = '';
+            input.value = '';
+            return;
+        }
+
+        let formatted = new Intl.NumberFormat('id-ID').format(value);
+        input.value = 'Rp ' + formatted;
+        document.getElementById('jumlah_asli').value = value;
+    }
+</script>
+@endpush

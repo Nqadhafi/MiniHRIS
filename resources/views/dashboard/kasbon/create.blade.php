@@ -28,10 +28,13 @@
                     <label for="tanggal_pengajuan">Tanggal Pengajuan</label>
                     <input type="date" name="tanggal_pengajuan" class="form-control" required>
                 </div>
+
                 <div class="form-group">
                     <label for="jumlah">Jumlah</label>
-                    <input type="number" name="jumlah" class="form-control" placeholder="Masukkan jumlah kasbon" required>
+                    <input type="text" id="jumlah" class="form-control" placeholder="Rp" oninput="formatRupiah(this)" required>
+                    <input type="hidden" name="jumlah" id="jumlah_asli">
                 </div>
+
                 <div class="form-group">
                     <label for="keperluan">Keperluan</label>
                     <textarea name="keperluan" class="form-control" rows="3" placeholder="Contoh: Biaya transportasi minggu ini" required></textarea>
@@ -43,3 +46,20 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function formatRupiah(input) {
+        let value = input.value.replace(/[^\d]/g, '');
+        if (!value) {
+            document.getElementById('jumlah_asli').value = '';
+            input.value = '';
+            return;
+        }
+
+        let formatted = new Intl.NumberFormat('id-ID').format(value);
+        input.value = 'Rp ' + formatted;
+        document.getElementById('jumlah_asli').value = value;
+    }
+</script>
+@endpush
