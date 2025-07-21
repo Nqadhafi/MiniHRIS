@@ -62,6 +62,7 @@
                     <thead>
                         <tr>
                             <th>No.</th>
+                            <th>Nama Pengaju</th>
                             <th>Tanggal Pengajuan</th>
                             <th>Jumlah</th>
                             <th>Keperluan</th>
@@ -73,6 +74,7 @@
                         @forelse($kasbons as $kasbon)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            <td>{{ $kasbon->user->userProfile->name ?? 'Tidak Diketahui' }}</td>
                             <td>{{ \Carbon\Carbon::parse($kasbon->tanggal_pengajuan)->format('d-m-Y') }}</td>
                             <td>Rp{{ number_format($kasbon->jumlah) }}</td>
                             <td>{{ Str::limit($kasbon->keperluan, 50) }}</td>
