@@ -10,8 +10,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 
-class KasbonExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class KasbonExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithEvents
 {
     protected $request;
 
@@ -106,14 +110,62 @@ class KasbonExport implements FromCollection, WithHeadings, WithMapping, ShouldA
             'Disetujui Oleh'
         ];
     }
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet;
+
+                // Ambil request untuk filter
+                $request = $this->request;
+
+                // Format tanggal
+                $startDate = $request->start_date ? \Carbon\Carbon::parse($request->start_date)->format('d-m-Y') : 'awal';
+                $endDate = $request->end_date ? \Carbon\Carbon::parse($request->end_date)->format('d-m-Y') : 'akhir';
+
+                // Sisipkan baris kosong dulu agar ada ruang
+                $sheet->insertNewRowBefore(1, 4);
+
+                // Merge cell untuk header
+                $sheet->mergeCells('A1:H1');
+                $sheet->setCellValue('A1', 'LAPORAN PENGAJUAN KASBON SHABAT PRINTING');
+
+                $sheet->mergeCells('A2:H2');
+                $sheet->setCellValue('A2', "Periode: {$startDate} s.d. {$endDate}");
+
+                $sheet->mergeCells('A3:H3');
+                $sheet->setCellValue('A3', "Tanggal Export: " . now()->format('d F Y, H:i'));
+
+                // Style header
+                $sheet->getDelegate()->getStyle('A1:A3')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 12,
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    ],
+                ]);
+
+                // Atur tinggi baris
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getRowDimension(2)->setRowHeight(18);
+                $sheet->getRowDimension(3)->setRowHeight(18);
+
+                // Update nomor kolom heading (karena sekarang data mulai dari baris ke-5)
+                $sheet->setAutoFilter('A5:H5');
+            },
+        ];
+    }
+
 
     /**
      * Styling worksheet
      */
     public function styles(Worksheet $sheet)
     {
-        return [
-            1 => ['font' => ['bold' => true]], // Bold header
-        ];
+    return [
+        5 => ['font' => ['bold' => true]], // Baris ke-5 adalah header kolom
+    ];
     }
 }
