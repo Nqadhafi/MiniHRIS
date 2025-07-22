@@ -46,6 +46,12 @@
             <div class="col-md-2">
                 <button type="submit" class="btn btn-secondary">Filter</button>
                 <a href="{{ route('settings.kasbons.index') }}" class="btn btn-secondary">Reset</a>
+                @if(auth()->user()->role->name === 'hr')
+                <a href="{{ route('kasbons.export', request()->all()) }}" 
+       class="btn btn-success">
+       Export Excel
+    </a>
+    @endif
             </div>
         </div>
     </form>

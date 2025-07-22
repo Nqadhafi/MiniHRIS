@@ -53,5 +53,6 @@ Route::middleware('auth.login')->group(function () {
         Route::put('kasbons/{kasbon}', [KasbonController::class, 'update'])
             ->name('kasbons.update')
             ->middleware('kasbon.approve');
+        Route::get('/settings/kasbons/export', [KasbonController::class, 'export'])->name('kasbons.export');
     });
 });
