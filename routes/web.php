@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuperAdmin\RoleController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\SuperAdmin\WhatsappSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,7 @@ Route::middleware('auth.login')->group(function () {
         Route::prefix('settings')->as('settings.')->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
+            Route::resource('whatsapp-settings', WhatsappSettingController::class)->only(['index', 'update']);
         });
     });
 
